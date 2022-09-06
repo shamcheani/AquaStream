@@ -27,8 +27,8 @@ import java.io.File
 
 class InAppUpdater {
     companion object {
-        const val GITHUB_USER_NAME = "recloudstream"
-        const val GITHUB_REPO = "cloudstream"
+        const val GITHUB_USER_NAME = "KillerDogeEmpire"
+        const val GITHUB_REPO = "AquaStream"
 
         const val LOG_TAG = "InAppUpdater"
 

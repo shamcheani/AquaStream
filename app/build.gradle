@@ -56,15 +56,16 @@ android {
     }
 
     buildTypes {
-        // release {
-        //     debuggable false
-        //     minifyEnabled false
-        //     shrinkResources false
-        //     proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        //     resValue "bool", "is_prerelease", "false"
-        // }
+         release {
+               applicationIdSuffix ".killerdogeempiresfork"
+               debuggable false
+               minifyEnabled false
+              shrinkResources false
+              proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+              resValue "bool", "is_prerelease", "false"
+         }
         prerelease {
-            applicationIdSuffix ".prerelease"
+            applicationIdSuffix ".prerelease.killerdogeempiresfork"
             buildConfigField("boolean", "BETA", "true")
             signingConfig signingConfigs.prerelease
             versionNameSuffix '-PRE'
