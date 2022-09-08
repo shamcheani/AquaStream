@@ -29,8 +29,8 @@ jobs:
       run: |
         TMP_KEYSTORE_FILE_PATH="${RUNNER_TEMP}"/keystore
         mkdir -p "${TMP_KEYSTORE_FILE_PATH}"
-        curl -H "Authorization: token ${{ secrets.PAT }}" -o "${TMP_KEYSTORE_FILE_PATH}/prerelease_keystore.keystore" "https://raw.githubusercontent.com/Sir-Aguacata/secrets/master/keystore.jks"
-        curl -H "Authorization: token ${{ secrets.PAT }}" -o "keystore_password.txt" "https://raw.githubusercontent.com/Sir-Aguacata/secrets/master/keystore_password.txt"
+        curl -H "Authorization: token ${{ secrets.PAT }}" -o "${TMP_KEYSTORE_FILE_PATH}/prerelease_keystore.keystore" "https://raw.githubusercontent.com/KillerDogeEmpire/secrets/master/keystore.jks"
+        curl -H "Authorization: token ${{ secrets.PAT }}" -o "keystore_password.txt" "https://raw.githubusercontent.com/KillerDogeEmpire/secrets/master/keystore_password.txt"
         KEY_PWD="$(cat keystore_password.txt)"
         echo "::add-mask::${KEY_PWD}"
         echo "::set-output name=key_pwd::$KEY_PWD"
