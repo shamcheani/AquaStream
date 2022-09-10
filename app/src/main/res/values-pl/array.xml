@@ -204,6 +204,7 @@
     <string-array name="themes_overlay_names">
         <item>Normalny</item>
         <item>Goździk różowy</item>
+        <item>Pomarańczowy</item>
         <item>Ciemnozielony</item>
         <item>Kasztanowaty</item>
         <item>Ciemnoniebieski</item>
@@ -222,6 +223,7 @@
     <string-array name="themes_overlay_names_values">
         <item>Normal</item>
         <item>CarnationPink</item>
+        <item>Orange</item>
         <item>DarkGreen</item>
         <item>Maroon</item>
         <item>NavyBlue</item>

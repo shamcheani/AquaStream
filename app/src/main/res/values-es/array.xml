@@ -208,6 +208,7 @@
     <string-array name="themes_overlay_names">
         <item>Normal</item>
         <item>Rosa clavel</item>
+        <item>Naranja</item>
         <item>Verde oscuro</item>
         <item>Vino</item>
         <item>Azul marino</item>
@@ -226,6 +227,7 @@
     <string-array name="themes_overlay_names_values">
         <item>Normal</item>
         <item>CarnationPink</item>
+        <item>Orange</item>
         <item>DarkGreen</item>
         <item>Maroon</item>
         <item>NavyBlue</item>

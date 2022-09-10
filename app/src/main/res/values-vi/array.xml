@@ -208,6 +208,7 @@
     <string-array name="themes_overlay_names">
         <item>Mặc định</item>
         <item>Hồng nhạt</item>
+        <item>Quả cam</item>
         <item>Xanh lam đậm</item>
         <item>Nâu sẫm</item>
         <item>Xanh lục</item>
@@ -226,6 +227,7 @@
     <string-array name="themes_overlay_names_values">
         <item>Normal</item>
         <item>CarnationPink</item>
+        <item>Orange</item>
         <item>DarkGreen</item>
         <item>Maroon</item>
         <item>NavyBlue</item>
