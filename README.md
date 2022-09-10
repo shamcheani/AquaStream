@@ -5,7 +5,7 @@ You can find the list of community-maintained extension repositories [here
 ](https://recloudstream.github.io/repos/)
 
 
-[![Discord](https://invidget.switchblade.xyz/5Hus6fM)](https://discord.gg/5Hus6fM)
+[![Discord](https://invidget.switchblade.xyz/BsqShAMKGW)](https://discord.gg/BsqShAMKGW)
 
 ***Features:***
 + **AdFree**, No ads whatsoever
