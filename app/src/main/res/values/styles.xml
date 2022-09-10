@@ -248,7 +248,7 @@
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryBrown</item>
     </style>
-    
+
         <style name="OverlayPrimaryColorOrange">
             <item name="colorPrimary">@color/colorPrimaryOrange</item>
             <item name="android:colorPrimary">@color/colorPrimaryOrange</item>
