@@ -199,20 +199,20 @@ object APIHolder {
      * but it turned out too complicated and unnecessary with extensions.
      **/
     fun Context.getApiProviderLangSettings(): HashSet<String> {
-        val langs = apis.map { it.lang }.toSet()
-            .sortedBy { SubtitleHelper.fromTwoLettersToLanguage(it) }
-        return langs.toHashSet()
+        //val langs = apis.map { it.lang }.toSet()
+            //.sortedBy { SubtitleHelper.fromTwoLettersToLanguage(it) }
+        //return langs.toHashSet()
 
-//        val settingsManager = PreferenceManager.getDefaultSharedPreferences(this)
-//        val hashSet = HashSet<String>()
-//        hashSet.add("en") // def is only en
-//        val list = settingsManager.getStringSet(
-//            this.getString(R.string.provider_lang_key),
-//            hashSet.toMutableSet()
-//        )
-//
-//        if (list.isNullOrEmpty()) return hashSet
-//        return list.toHashSet()
+          val settingsManager = PreferenceManager.getDefaultSharedPreferences(this)
+          val hashSet = HashSet<String>()
+          hashSet.add("en") // def is only en
+          val list = settingsManager.getStringSet(
+              this.getString(R.string.provider_lang_key),
+          hashSet.toMutableSet()
+       )
+
+        if (list.isNullOrEmpty()) return hashSet
+       return list.toHashSet()
     }
 
     fun Context.getApiTypeSettings(): HashSet<TvType> {
