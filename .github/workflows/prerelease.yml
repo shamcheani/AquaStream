@@ -33,7 +33,7 @@ jobs:
         curl -H "Authorization: token ${{ secrets.PAT }}" -o "keystore_password.txt" "https://raw.githubusercontent.com/KillerDogeEmpire/secrets/master/keystore_password.txt"
         KEY_PWD="$(cat keystore_password.txt)"
         echo "::add-mask::${KEY_PWD}"
-        echo "::set-output name=key_pwd::$KEY_PWD"
+        echo "key_pwd=$KEY_PWD" >> $GITHUB_OUTPUT
     - name: Run Gradle
       run: |
         ./gradlew assemblePrerelease makeJar androidSourcesJar
@@ -49,6 +49,6 @@ jobs:
         prerelease: true
         title: "Pre-release Build"
         files: |
-          app/build/outputs/apk/prerelease/*.apk
+          app/build/outputs/apk/prerelease/release/*.apk
           app/build/libs/app-sources.jar
           app/build/classes.jar
