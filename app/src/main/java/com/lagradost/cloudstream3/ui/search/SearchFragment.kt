@@ -1,5 +1,6 @@
 package com.lagradost.cloudstream3.ui.search
 
+import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.AbsListView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -28,6 +30,7 @@ import com.lagradost.cloudstream3.APIHolder.getApiProviderLangSettings
 import com.lagradost.cloudstream3.APIHolder.getApiSettings
 import com.lagradost.cloudstream3.AcraApplication.Companion.getKey
 import com.lagradost.cloudstream3.AcraApplication.Companion.removeKey
+import com.lagradost.cloudstream3.AcraApplication.Companion.removeKeys
 import com.lagradost.cloudstream3.AcraApplication.Companion.setKey
 import com.lagradost.cloudstream3.MainActivity.Companion.afterPluginsLoadedEvent
 import com.lagradost.cloudstream3.mvvm.Resource
@@ -68,6 +71,14 @@ class SearchFragment : Fragment() {
                 } else {
                     true
                 }
+            }
+        }
+
+        const val SEARCH_QUERY = "search_query"
+
+        fun newInstance(query: String): Bundle {
+            return Bundle().apply {
+                putString(SEARCH_QUERY, query)
             }
         }
     }
@@ -117,18 +128,37 @@ class SearchFragment : Fragment() {
     var selectedSearchTypes = mutableListOf<TvType>()
     var selectedApis = mutableSetOf<String>()
 
+    /**
+     * Will filter all providers by preferred media and selectedSearchTypes.
+     * If that results in no available providers then only filter
+     * providers by preferred media
+     **/
     fun search(query: String?) {
         if (query == null) return
-        context?.getApiSettings()?.let { settings ->
+
+        context?.let { ctx ->
+            val default = enumValues<TvType>().sorted().filter { it != TvType.NSFW }
+                .map { it.ordinal.toString() }.toSet()
+            val preferredTypes = (PreferenceManager.getDefaultSharedPreferences(ctx)
+                .getStringSet(this.getString(R.string.prefer_media_type_key), default)
+                ?.ifEmpty { default } ?: default)
+                .mapNotNull { it.toIntOrNull() ?: return@mapNotNull null }
+
+            val settings = ctx.getApiSettings()
+
+            val notFilteredBySelectedTypes = selectedApis.filter { name ->
+                settings.contains(name)
+            }.map { name ->
+                name to getApiFromNameNull(name)?.supportedTypes
+            }.filter { (_, types) ->
+                types?.any { preferredTypes.contains(it.ordinal) } == true
+            }
+
             searchViewModel.searchAndCancel(
                 query = query,
-                providersActive = selectedApis.filter { name ->
-                    settings.contains(name) && getApiFromNameNull(name)?.supportedTypes?.any {
-                        selectedSearchTypes.contains(
-                            it
-                        )
-                    } == true
-                }.toSet()
+                providersActive = notFilteredBySelectedTypes.filter { (_, types) ->
+                    types?.any { selectedSearchTypes.contains(it) } == true
+                }.ifEmpty { notFilteredBySelectedTypes }.map { it.first }.toSet()
             )
         }
     }
@@ -203,7 +233,9 @@ class SearchFragment : Fragment() {
                 builder.setContentView(R.layout.home_select_mainpage)
                 builder.show()
                 builder.let { dialog ->
-                    val isMultiLang = ctx.getApiProviderLangSettings().size > 1
+                    val isMultiLang = ctx.getApiProviderLangSettings().let { set ->
+                        set.size > 1 || set.contains(AllLanguagesName)
+                    }
 
                     val cancelBtt = dialog.findViewById<MaterialButton>(R.id.cancel_btt)
                     val applyBtt = dialog.findViewById<MaterialButton>(R.id.apply_btt)
@@ -227,7 +259,7 @@ class SearchFragment : Fragment() {
                     }
 
                     fun updateList(types: List<TvType>) {
-                        setKey(SEARCH_PREF_TAGS, types.map {it.name})
+                        setKey(SEARCH_PREF_TAGS, types.map { it.name })
 
                         arrayAdapter.clear()
                         currentValidApis = validAPIs.filter { api ->
@@ -323,7 +355,7 @@ class SearchFragment : Fragment() {
                     searchViewModel.updateHistory()
                 }
 
-                search_history_recycler?.isVisible = showHistory
+                search_history_holder?.isVisible = showHistory
 
                 search_master_recycler?.isVisible = !showHistory && isAdvancedSearch
                 search_autofit_results?.isVisible = !showHistory && !isAdvancedSearch
@@ -332,7 +364,41 @@ class SearchFragment : Fragment() {
             }
         })
 
+        search_clear_call_history?.setOnClickListener {
+            activity?.let { ctx ->
+                val builder: AlertDialog.Builder = AlertDialog.Builder(ctx)
+                val dialogClickListener =
+                    DialogInterface.OnClickListener { _, which ->
+                        when (which) {
+                            DialogInterface.BUTTON_POSITIVE -> {
+                                removeKeys(SEARCH_HISTORY_KEY)
+                                searchViewModel.updateHistory()
+                            }
+                            DialogInterface.BUTTON_NEGATIVE -> {
+                            }
+                        }
+                    }
+
+                try {
+                    builder.setTitle(R.string.clear_history).setMessage(
+                        ctx.getString(R.string.delete_message).format(
+                            ctx.getString(R.string.history)
+                        )
+                    )
+                        .setPositiveButton(R.string.sort_clear, dialogClickListener)
+                        .setNegativeButton(R.string.cancel, dialogClickListener)
+                        .show()
+                } catch (e: Exception) {
+                    logError(e)
+                    // ye you somehow fucked up formatting did you?
+                }
+            }
+
+
+        }
+
         observe(searchViewModel.currentHistory) { list ->
+            search_clear_call_history?.isVisible = list.isNotEmpty()
             (search_history_recycler.adapter as? SearchHistoryAdaptor?)?.updateList(list)
         }
 
@@ -429,6 +495,14 @@ class SearchFragment : Fragment() {
 
         search_master_recycler?.adapter = masterAdapter
         search_master_recycler?.layoutManager = GridLayoutManager(context, 1)
+
+        // Automatically search the specified query, this allows the app search to launch from intent
+        arguments?.getString(SEARCH_QUERY)?.let { query ->
+            if (query.isBlank()) return@let
+            main_search?.setQuery(query, true)
+            // Clear the query as to not make it request the same query every time the page is opened
+            arguments?.putString(SEARCH_QUERY, null)
+        }
 
         // SubtitlesFragment.push(activity)
         //searchViewModel.search("iron man")

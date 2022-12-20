@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -23,8 +23,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.ChangeBounds
+import androidx.transition.TransitionManager
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
@@ -55,6 +57,7 @@ import com.lagradost.cloudstream3.ui.search.*
 import com.lagradost.cloudstream3.ui.search.SearchHelper.handleSearchClickCallback
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.isTrueTvSettings
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.isTvSettings
+import com.lagradost.cloudstream3.utils.AppUtils.addProgramsToContinueWatching
 import com.lagradost.cloudstream3.utils.AppUtils.isRecyclerScrollable
 import com.lagradost.cloudstream3.utils.AppUtils.loadResult
 import com.lagradost.cloudstream3.utils.AppUtils.loadSearchResult
@@ -73,6 +76,8 @@ import com.lagradost.cloudstream3.utils.SingleSelectionHelper.showOptionSelectSt
 import com.lagradost.cloudstream3.utils.SubtitleHelper.getFlagFromIso
 import com.lagradost.cloudstream3.utils.UIHelper.dismissSafe
 import com.lagradost.cloudstream3.utils.UIHelper.fixPaddingStatusbar
+import com.lagradost.cloudstream3.utils.UIHelper.fixPaddingStatusbarView
+import com.lagradost.cloudstream3.utils.UIHelper.getResourceColor
 import com.lagradost.cloudstream3.utils.UIHelper.getSpanCount
 import com.lagradost.cloudstream3.utils.UIHelper.popupMenuNoIconsAndNoStringRes
 import com.lagradost.cloudstream3.utils.UIHelper.setImage
@@ -104,10 +109,12 @@ import kotlinx.android.synthetic.main.fragment_home.home_watch_holder
 import kotlinx.android.synthetic.main.fragment_home.home_watch_parent_item_title
 import kotlinx.android.synthetic.main.fragment_home.result_error_text
 import kotlinx.android.synthetic.main.fragment_home_tv.*
+import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.home_episodes_expanded.*
 import kotlinx.android.synthetic.main.tvtypes_chips.*
 import kotlinx.android.synthetic.main.tvtypes_chips.view.*
 import java.util.*
+
 
 const val HOME_BOOKMARK_VALUE_LIST = "home_bookmarked_last_list"
 const val HOME_PREF_HOMEPAGE = "home_pref_homepage"
@@ -345,7 +352,9 @@ class HomeFragment : Fragment() {
             builder.setContentView(R.layout.home_select_mainpage)
             builder.show()
             builder.let { dialog ->
-                val isMultiLang = getApiProviderLangSettings().size > 1
+                val isMultiLang = getApiProviderLangSettings().let { set ->
+                    set.size > 1 || set.contains(AllLanguagesName)
+                }
                 //dialog.window?.setGravity(Gravity.BOTTOM)
 
                 var currentApiName = selectedApiName
@@ -435,6 +444,7 @@ class HomeFragment : Fragment() {
         home_main_poster_recyclerview?.isVisible = visible
     }
 
+    @SuppressLint("NotifyDataSetChanged") // we need to notify to change poster
     private fun fixGrid() {
         activity?.getSpanCount()?.let {
             currentSpan = it
@@ -457,19 +467,20 @@ class HomeFragment : Fragment() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        (home_preview_viewpager?.adapter as? HomeScrollAdapter)?.notifyDataSetChanged()
         fixGrid()
     }
 
     override fun onResume() {
         super.onResume()
         reloadStored()
-        afterPluginsLoadedEvent += ::firstLoadHomePage
-        mainPluginsLoadedEvent += ::firstLoadHomePage
+        afterPluginsLoadedEvent += ::afterPluginsLoaded
+        mainPluginsLoadedEvent += ::afterMainPluginsLoaded
     }
 
     override fun onStop() {
-        afterPluginsLoadedEvent -= ::firstLoadHomePage
-        mainPluginsLoadedEvent -= ::firstLoadHomePage
+        afterPluginsLoadedEvent -= ::afterPluginsLoaded
+        mainPluginsLoadedEvent -= ::afterMainPluginsLoaded
         super.onStop()
     }
 
@@ -482,15 +493,18 @@ class HomeFragment : Fragment() {
         homeViewModel.loadStoredData(list)
     }
 
-    private fun firstLoadHomePage(successful: Boolean = false) {
-        // dirty hack to make it only load once
+    private fun afterMainPluginsLoaded(unused: Boolean = false) {
         loadHomePage(false)
     }
 
-    private fun loadHomePage(forceReload: Boolean = true) {
+    private fun afterPluginsLoaded(forceReload: Boolean) {
+        loadHomePage(forceReload)
+    }
+
+    private fun loadHomePage(forceReload: Boolean) {
         val apiName = context?.getKey<String>(USER_SELECTED_HOMEPAGE_API)
 
-        if (homeViewModel.apiName.value != apiName || apiName == null) {
+        if (homeViewModel.apiName.value != apiName || apiName == null || forceReload) {
             //println("Caught home: " + homeViewModel.apiName.value + " at " + apiName)
             homeViewModel.loadAndCancel(apiName, forceReload)
         }
@@ -541,48 +555,121 @@ class HomeFragment : Fragment() {
         }
 
         observe(homeViewModel.preview) { preview ->
+            // Always reset the padding, otherwise the will move lower and lower
+            // home_fix_padding?.setPadding(0, 0, 0, 0)
+            home_fix_padding?.let { v ->
+                val params = v.layoutParams
+                params.height = 0
+                v.layoutParams = params
+            }
+
             when (preview) {
                 is Resource.Success -> {
                     home_preview?.isVisible = true
-                    preview.value.apply {
-                        home_preview_tags?.text = tags?.joinToString(" • ") ?: ""
-                        home_preview_tags?.isGone = tags.isNullOrEmpty()
-                        home_preview_image?.setImage(posterUrl, posterHeaders)
-                        home_preview_title?.text = name
-                        home_preview_play?.setOnClickListener {
-                            activity?.loadResult(url, apiName, START_ACTION_RESUME_LATEST)
-                            //activity.loadSearchResult(url, START_ACTION_RESUME_LATEST)
+                    (home_preview_viewpager?.adapter as? HomeScrollAdapter)?.apply {
+                        if (!setItems(preview.value.second, preview.value.first)) {
+                            home_preview_viewpager?.setCurrentItem(0, false)
                         }
-                        home_preview_info?.setOnClickListener {
-                            activity?.loadResult(url, apiName)
-                            //activity.loadSearchResult(random)
-                        }
-                        // very ugly code, but I dont care
-                        val watchType = DataStoreHelper.getResultWatchState(preview.value.getId())
-                        home_preview_bookmark?.setText(watchType.stringRes)
-                        home_preview_bookmark?.setCompoundDrawablesWithIntrinsicBounds(null,getDrawable(home_preview_bookmark.context, watchType.iconRes),null,null)
-                        home_preview_bookmark?.setOnClickListener { fab ->
-                            activity?.showBottomDialog(
-                                WatchType.values().map { fab.context.getString(it.stringRes) }
-                                    .toList(),
-                                DataStoreHelper.getResultWatchState(preview.value.getId()).ordinal,
-                                fab.context.getString(R.string.action_add_to_bookmarks),
-                                showApply = false,
-                                {}) {
-                                val newValue = WatchType.values()[it]
-                                home_preview_bookmark?.setCompoundDrawablesWithIntrinsicBounds(null,getDrawable(home_preview_bookmark.context, newValue.iconRes),null,null)
-                                home_preview_bookmark?.setText(newValue.stringRes)
-
-                                updateWatchStatus(preview.value, newValue)
-                                reloadStored()
-                            }
-                        }
+                        // home_preview_viewpager?.setCurrentItem(1000, false)
                     }
+
+                    //.also {
+                    //home_preview_viewpager?.adapter =
+                    //}
                 }
                 else -> {
+                    (home_preview_viewpager?.adapter as? HomeScrollAdapter)?.setItems(
+                        listOf(),
+                        false
+                    )
                     home_preview?.isVisible = false
+                    context?.fixPaddingStatusbarView(home_fix_padding)
                 }
             }
+        }
+
+        val searchText =
+            home_search?.findViewById<SearchView.SearchAutoComplete>(androidx.appcompat.R.id.search_src_text)
+        searchText?.context?.getResourceColor(R.attr.white)?.let { color ->
+            searchText.setTextColor(color)
+            searchText.setHintTextColor(color)
+        }
+
+        home_preview_viewpager?.apply {
+            setPageTransformer(HomeScrollTransformer())
+            val callback: OnPageChangeCallback = object : OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+
+                    // home_search?.isIconified = true
+                    //home_search?.isVisible = true
+                    //home_search?.clearFocus()
+
+                    (home_preview_viewpager?.adapter as? HomeScrollAdapter)?.apply {
+                        if (position >= itemCount - 1 && hasMoreItems) {
+                            hasMoreItems = false // dont make two requests
+                            homeViewModel.loadMoreHomeScrollResponses()
+                        }
+
+                        getItem(position)
+                            ?.apply {
+                                home_preview_title_holder?.let { parent ->
+                                    TransitionManager.beginDelayedTransition(parent, ChangeBounds())
+                                }
+
+                                // home_preview_tags?.text = tags?.joinToString(" • ") ?: ""
+                                // home_preview_tags?.isGone = tags.isNullOrEmpty()
+                                // home_preview_image?.setImage(posterUrl, posterHeaders)
+                                // home_preview_title?.text = name
+
+                                home_preview_play?.setOnClickListener {
+                                    activity?.loadResult(url, apiName, START_ACTION_RESUME_LATEST)
+                                    //activity.loadSearchResult(url, START_ACTION_RESUME_LATEST)
+                                }
+                                home_preview_info?.setOnClickListener {
+                                    activity?.loadResult(url, apiName)
+                                    //activity.loadSearchResult(random)
+                                }
+                                // very ugly code, but I dont care
+                                val watchType = DataStoreHelper.getResultWatchState(this.getId())
+                                home_preview_bookmark?.setText(watchType.stringRes)
+                                home_preview_bookmark?.setCompoundDrawablesWithIntrinsicBounds(
+                                    null,
+                                    getDrawable(home_preview_bookmark.context, watchType.iconRes),
+                                    null,
+                                    null
+                                )
+                                home_preview_bookmark?.setOnClickListener { fab ->
+                                    activity?.showBottomDialog(
+                                        WatchType.values()
+                                            .map { fab.context.getString(it.stringRes) }
+                                            .toList(),
+                                        DataStoreHelper.getResultWatchState(this.getId()).ordinal,
+                                        fab.context.getString(R.string.action_add_to_bookmarks),
+                                        showApply = false,
+                                        {}) {
+                                        val newValue = WatchType.values()[it]
+                                        home_preview_bookmark?.setCompoundDrawablesWithIntrinsicBounds(
+                                            null,
+                                            getDrawable(
+                                                home_preview_bookmark.context,
+                                                newValue.iconRes
+                                            ),
+                                            null,
+                                            null
+                                        )
+                                        home_preview_bookmark?.setText(newValue.stringRes)
+
+                                        updateWatchStatus(this, newValue)
+                                        reloadStored()
+                                    }
+                                }
+
+                            }
+                    }
+                }
+            }
+            registerOnPageChangeCallback(callback)
+            adapter = HomeScrollAdapter()
         }
 
         observe(homeViewModel.apiName) { apiName ->
@@ -749,14 +836,32 @@ class HomeFragment : Fragment() {
             Pair(home_type_on_hold_btt, WatchType.ONHOLD),
             Pair(home_plan_to_watch_btt, WatchType.PLANTOWATCH),
         )
+        val currentSet = getKey<IntArray>(HOME_BOOKMARK_VALUE_LIST)
+            ?.map { WatchType.fromInternalId(it) }?.toSet() ?: emptySet()
 
-        for (item in toggleList) {
-            val watch = item.second
-            item.first?.setOnClickListener {
+        for ((chip, watch) in toggleList) {
+            chip.isChecked = currentSet.contains(watch)
+            chip?.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    homeViewModel.loadStoredData(
+                        setOf(watch)
+                        // If we filter all buttons then two can be checked at the same time
+                        // Revert this if you want to go back to multi selection
+//                    toggleList.filter { it.first?.isChecked == true }.map { it.second }.toSet()
+                    )
+                }
+                // Else if all are unchecked -> Do not load data
+                else if (toggleList.all { it.first?.isChecked != true }) {
+                    homeViewModel.loadStoredData(emptySet())
+                }
+            }
+            /*chip?.setOnClickListener {
+
+
                 homeViewModel.loadStoredData(EnumSet.of(watch))
             }
 
-            item.first?.setOnLongClickListener { itemView ->
+            chip?.setOnLongClickListener { itemView ->
                 val list = EnumSet.noneOf(WatchType::class.java)
                 itemView.context.getKey<IntArray>(HOME_BOOKMARK_VALUE_LIST)
                     ?.map { WatchType.fromInternalId(it) }?.let {
@@ -770,7 +875,7 @@ class HomeFragment : Fragment() {
                 }
                 homeViewModel.loadStoredData(list)
                 return@setOnLongClickListener true
-            }
+            }*/
         }
 
         observe(homeViewModel.availableWatchStatusTypes) { availableWatchStatusTypes ->
@@ -826,11 +931,13 @@ class HomeFragment : Fragment() {
                 resumeWatching
             )
 
-            //if (context?.isTvSettings() == true) {
-            //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //        context?.addProgramsToContinueWatching(resumeWatching.mapNotNull { it as? DataStoreHelper.ResumeWatchingResult })
-            //    }
-            //}
+            if (isTrueTvSettings()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    ioSafe {
+                        activity?.addProgramsToContinueWatching(resumeWatching.mapNotNull { it as? DataStoreHelper.ResumeWatchingResult })
+                    }
+                }
+            }
 
             home_watch_child_more_info?.setOnClickListener {
                 activity?.loadHomepageList(
@@ -993,6 +1100,7 @@ class HomeFragment : Fragment() {
         }
 
         //context?.fixPaddingStatusbarView(home_statusbar)
+        context?.fixPaddingStatusbar(home_padding)
         context?.fixPaddingStatusbar(home_loading_statusbar)
 
         home_master_recycler.adapter =
@@ -1014,7 +1122,7 @@ class HomeFragment : Fragment() {
         } // GridLayoutManager(context, 1).also { it.supportsPredictiveItemAnimations() }
 
         reloadStored()
-        loadHomePage()
+        loadHomePage(false)
 
         home_loaded.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
             val dy = scrollY - oldScrollY

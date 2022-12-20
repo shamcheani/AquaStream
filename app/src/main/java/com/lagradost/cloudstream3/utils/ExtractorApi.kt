@@ -205,6 +205,8 @@ val extractorApis: MutableList<ExtractorApi> = arrayListOf(
     VideovardSX(),
     Mp4Upload(),
     StreamTape(),
+    StreamTapeNet(),
+    ShaveTape(),
 
     //mixdrop extractors
     MixDropBz(),
@@ -329,6 +331,8 @@ val extractorApis: MutableList<ExtractorApi> = arrayListOf(
     Vidmolyme(),
     Voe(),
     Moviehab(),
+    MoviehabNet(),
+    Jeniusplay(),
 
     Gdriveplayerapi(),
     Gdriveplayerapp(),

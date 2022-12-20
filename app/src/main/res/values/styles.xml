@@ -56,6 +56,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="textColor">@color/textColor</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <item name="grayTextColor">@color/grayTextColor</item>
         <item name="primaryGrayBackground">@color/primaryGrayBackground</item>
         <item name="primaryBlackBackground">@color/primaryBlackBackground</item>
@@ -69,6 +70,8 @@
 
     <style name="ListViewStyle" parent="Widget.AppCompat.ListView">
         <item name="android:divider">@null</item>
+        <item name="android:listSelector">@drawable/outline_drawable_less</item>
+        <item name="android:drawSelectorOnTop">false</item>
     </style>
 
     <style name="AmoledModeLight" parent="AmoledMode">
@@ -76,7 +79,15 @@
     </style>
 
     <style name="ChipFilled" parent="@style/Widget.Material3.Chip.Filter">
-         <item name="chipBackgroundColor">@color/chip_color</item>
+        <item name="chipBackgroundColor">@color/chip_color</item>
+        <item name="chipStrokeColor">@color/white_transparent_toggle</item>
+        <item name="chipStrokeWidth">2dp</item>
+        <item name="textColor">@color/chip_color_text</item>
+        <item name="android:textColor">@color/chip_color_text</item>
+        <item name="checkedIconTint">@color/chip_color_text</item>
+        <item name="fontFamily">@font/google_sans</item>
+        <item name="chipIconTint">@color/chip_color_text</item>
+        <item name="android:fontFamily">@font/google_sans</item>
     </style>
 
     <style name="AmoledMode">
@@ -87,6 +98,25 @@
         <item name="textColor">@color/textColor</item>
         <item name="grayTextColor">@color/grayTextColor</item>
         <item name="white">@color/white</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
+    </style>
+
+    <style name="DubButton" parent="@style/SearchBox">
+        <item name="android:background">@drawable/dub_bg_color</item>
+        <item name="android:text">@string/app_dubbed_text</item>
+        <item name="android:textColor">@color/dubColorText</item>
+    </style>
+
+    <style name="SubButton" parent="@style/SearchBox">
+        <item name="android:background">@drawable/sub_bg_color</item>
+        <item name="android:text">@string/app_subbed_text</item>
+        <item name="android:textColor">@color/subColorText</item>
+    </style>
+
+    <style name="TypeButton" parent="@style/SearchBox">
+        <item name="android:background">@drawable/type_bg_color</item>
+        <item name="android:text">@string/quality_hd</item>
+        <item name="android:textColor">@color/typeColorText</item>
     </style>
 
     <style name="LightMode">
@@ -97,6 +127,7 @@
         <item name="textColor">@color/lightTextColor</item>
         <item name="grayTextColor">@color/lightGrayTextColor</item>
         <item name="white">#000</item>
+        <item name="colorOnPrimary">@color/blackText</item>
     </style>
 
     <style name="MonetMode">
@@ -107,6 +138,7 @@
         <item name="textColor">@color/material_dynamic_neutral90</item>
         <item name="grayTextColor">@color/material_dynamic_neutral60</item>
         <item name="white">@color/material_dynamic_neutral90</item>
+        <item name="colorOnPrimary">@color/material_on_primary_emphasis_medium</item>
     </style>
 
     <style name="OverlayPrimaryColorNormal">
@@ -114,7 +146,7 @@
         <item name="android:colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorOnPrimary">@color/colorAccent</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!-- Needed for leanback fuckery -->
         <item name="android:colorAccent">@color/colorAccent</item>
     </style>
@@ -130,13 +162,13 @@
     </style>
 
     <style name="OverlayPrimaryColorMonetTwo">
-        <item name="colorPrimary">@color/material_dynamic_tertiary80</item>
-        <item name="android:colorPrimary">@color/material_dynamic_tertiary80</item>
-        <item name="colorPrimaryDark">@color/material_dynamic_tertiary30</item>
-        <item name="colorAccent">@color/material_dynamic_tertiary80</item>
-        <item name="colorOnPrimary">@color/material_dynamic_tertiary20</item>
+        <item name="colorPrimary">@color/material_dynamic_secondary80</item>
+        <item name="android:colorPrimary">@color/material_dynamic_secondary80</item>
+        <item name="colorPrimaryDark">@color/material_dynamic_secondary30</item>
+        <item name="colorAccent">@color/material_dynamic_secondary80</item>
+        <item name="colorOnPrimary">@color/material_dynamic_secondary20</item>
         <!-- Needed for leanback fuckery -->
-        <item name="android:colorAccent">@color/material_dynamic_tertiary30</item>
+        <item name="android:colorAccent">@color/material_dynamic_secondary30</item>
     </style>
 
     <style name="OverlayPrimaryColorBlue">
@@ -144,7 +176,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryBlue</item>
         <item name="colorPrimaryDark">#4855A2</item>
         <item name="colorAccent">#5A6BCB</item>
-        <item name="colorOnPrimary">#5A6BCB</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!-- Needed for leanback fuckery -->
         <item name="android:colorAccent">@color/colorPrimaryBlue</item>
     </style>
@@ -154,7 +186,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryPurple</item>
         <item name="colorPrimaryDark">#4704A3</item>
         <item name="colorAccent">#7125DB</item>
-        <item name="colorOnPrimary">#7125DB</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <item name="android:colorAccent">@color/colorPrimaryPurple</item>
     </style>
 
@@ -163,7 +195,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryGreen</item>
         <item name="colorPrimaryDark">#007363</item>
         <item name="colorAccent">#39C1AE</item>
-        <item name="colorOnPrimary">#39C1AE</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <item name="android:colorAccent">@color/colorPrimaryGreen</item>
     </style>
 
@@ -172,7 +204,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryGreenApple</item>
         <item name="colorPrimaryDark">#319B5A</item>
         <item name="colorAccent">#51C57E</item>
-        <item name="colorOnPrimary">#51C57E</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <item name="android:colorAccent">@color/colorPrimaryGreenApple</item>
     </style>
 
@@ -181,7 +213,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryRed</item>
         <item name="colorPrimaryDark">#B62B2B</item>
         <item name="colorAccent">@color/colorPrimaryRed</item> <!--#F53B3B-->
-        <item name="colorOnPrimary">@color/colorPrimaryRed</item> <!--#EC3838-->
+        <item name="colorOnPrimary">@color/whiteText</item> <!--#EC3838-->
         <!-- Needed for leanback fuckery -->
         <item name="android:colorAccent">@color/colorPrimaryRed</item>
     </style>
@@ -191,7 +223,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryBanana</item>
         <item name="colorPrimaryDark">#9B7D31</item>
         <item name="colorAccent">#C5B251</item>
-        <item name="colorOnPrimary">#C5A851</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <item name="android:colorAccent">@color/colorPrimaryBanana</item>
     </style>
 
@@ -200,7 +232,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryParty</item>
         <item name="colorPrimaryDark">#C1495B</item>
         <item name="colorAccent">#FD798C</item>
-        <item name="colorOnPrimary">#BF5968</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <item name="android:colorAccent">@color/colorPrimaryParty</item>
     </style>
 
@@ -209,7 +241,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryPink</item>
         <item name="colorPrimaryDark">#DD1280</item>
         <item name="colorAccent">#FF4DAE</item>
-        <item name="colorOnPrimary">#DD1280</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <item name="android:colorAccent">@color/colorPrimaryPink</item>
     </style>
 
@@ -218,7 +250,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryCarnationPink</item>
         <item name="colorPrimaryDark">#83366f</item>
         <item name="colorAccent">#BD5DA5</item>
-        <item name="colorOnPrimary">#BD5DA5</item>
+        <item name="colorOnPrimary">@color/blackText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryCarnationPink</item>
     </style>
@@ -228,7 +260,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryMaroon</item>
         <item name="colorPrimaryDark">#370C0C</item>
         <item name="colorAccent">#451010</item>
-        <item name="colorOnPrimary">#451010</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryMaroon</item>
     </style>
@@ -238,7 +270,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryDarkGreen</item>
         <item name="colorPrimaryDark">#003d00</item>
         <item name="colorAccent">#004500</item>
-        <item name="colorOnPrimary">#004500</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryDarkGreen</item>
     </style>
@@ -248,7 +280,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryNavyBlue</item>
         <item name="colorPrimaryDark">#000073</item>
         <item name="colorAccent">#000080</item>
-        <item name="colorOnPrimary">#000080</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryNavyBlue</item>
     </style>
@@ -258,19 +290,19 @@
         <item name="android:colorPrimary">@color/colorPrimaryGrey</item>
         <item name="colorPrimaryDark">#484848</item>
         <item name="colorAccent">#515151</item>
-        <item name="colorOnPrimary">#515151</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryGrey</item>
     </style>
 
-    <style name="OverlayPrimaryColorCoolBlue">
-        <item name="colorPrimary">@color/colorPrimaryCoolBlue</item>
-        <item name="android:colorPrimary">@color/colorPrimaryCoolBlue</item>
-        <item name="colorPrimaryDark">#306981</item>
-        <item name="colorAccent">#51b0d7</item>
-        <item name="colorOnPrimary">#408cac</item>
-        <!--    Needed for leanback fuckery    -->
-        <item name="android:colorAccent">@color/colorPrimaryCoolBlue</item>
+    <style name="OverlayPrimaryColorWhite">
+        <item name="colorPrimary">@color/colorPrimaryWhite</item>
+        <item name="android:colorPrimary">@color/colorPrimaryWhite</item>
+        <item name="colorPrimaryDark">#CCCCCC</item>
+        <item name="colorAccent">#FFFFFF</item>
+        <item name="colorOnPrimary">@color/blackText</item>
+        <!--   Needed for leanback fuckery   -->
+        <item name="android:colorAccent">@color/colorPrimaryWhite</item>
     </style>
 
     <style name="OverlayPrimaryColorBrown">
@@ -278,21 +310,10 @@
         <item name="android:colorPrimary">@color/colorPrimaryBrown</item>
         <item name="colorPrimaryDark">#582700</item>
         <item name="colorAccent">#622C00</item>
-        <item name="colorOnPrimary">#622C00</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--   Needed for leanback fuckery   -->
         <item name="android:colorAccent">@color/colorPrimaryBrown</item>
     </style>
-
-        <style name="OverlayPrimaryColorOrange">
-            <item name="colorPrimary">@color/colorPrimaryOrange</item>
-            <item name="android:colorPrimary">@color/colorPrimaryOrange</item>
-            <item name="colorPrimaryDark">#A66B00</item>
-            <item name="colorAccent">#CE8500</item>
-            <item name="colorOnPrimary">#CE8500</item>
-            <!--    Needed for leanback fuckery    -->
-            <item name="android:colorAccent">@color/colorPrimaryOrange</item>
-        </style>
-
 
     <style name="customRatingBar" parent="@style/Widget.AppCompat.RatingBar">
 
@@ -437,7 +458,7 @@
         <item name="android:paddingStart">20dp</item>
         <item name="android:paddingEnd">20dp</item>
         <item name="android:selectAllOnFocus">true</item>
-        <item name="android:background">@color/transparent</item>
+        <item name="android:background">@drawable/outline_drawable_less</item>
         <item name="android:textColor">?attr/textColor</item>
         <item name="android:foreground">?attr/selectableItemBackgroundBorderless</item>
         <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
@@ -461,10 +482,10 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">5dp</item>
-        <item name="android:paddingLeft">10dp</item>
-        <item name="android:paddingRight">10dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingLeft">7dp</item>
+        <item name="android:paddingRight">7dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
         <item name="android:textSize">12sp</item>
         <item name="textColor">@color/textColor</item>
         <item name="android:textColor">@color/textColor</item>

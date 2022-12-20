@@ -88,6 +88,7 @@ data class ResultData(
     var syncData: Map<String, String>,
 
     val posterImage: UiImage?,
+    val posterBackgroundImage: UiImage?,
     val plotText: UiText,
     val apiName: UiText,
     val ratingText: UiText?,
@@ -169,6 +170,9 @@ fun LoadResponse.toResultData(repo: APIRepository): ResultData {
         nextAiringEpisode = nextAiringEpisode,
         posterImage = img(
             posterUrl, posterHeaders
+        ) ?: img(R.drawable.default_cover),
+        posterBackgroundImage = img(
+            backgroundPosterUrl ?: posterUrl, posterHeaders
         ) ?: img(R.drawable.default_cover),
         titleText = txt(name),
         url = url,
@@ -412,7 +416,7 @@ class ResultViewModel2 : ViewModel() {
             return this?.firstOrNull { it.season == season }
         }
 
-        fun updateWatchStatus(currentResponse : LoadResponse, status: WatchType) {
+        fun updateWatchStatus(currentResponse: LoadResponse, status: WatchType) {
             val currentId = currentResponse.getId()
             val resultPage = currentResponse
 
@@ -789,7 +793,7 @@ class ResultViewModel2 : ViewModel() {
 
 
     fun updateWatchStatus(status: WatchType) {
-        updateWatchStatus(currentResponse ?: return,status)
+        updateWatchStatus(currentResponse ?: return, status)
         _watchStatus.postValue(status)
     }
 
@@ -1142,6 +1146,7 @@ class ResultViewModel2 : ViewModel() {
                         txt(R.string.episode_action_download_mirror) to ACTION_DOWNLOAD_MIRROR,
                         txt(R.string.episode_action_download_subtitle) to ACTION_DOWNLOAD_EPISODE_SUBTITLE_MIRROR,
                         txt(R.string.episode_action_reload_links) to ACTION_RELOAD_EPISODE,
+//                        txt(R.string.action_mark_as_watched) to ACTION_MARK_AS_WATCHED,
                     )
                 )
 
@@ -1361,7 +1366,7 @@ class ResultViewModel2 : ViewModel() {
                     R.id.global_to_navigation_player,
                     GeneratorPlayer.newInstance(
                         generator?.also {
-                            it.getAll() // I know kinda shit to itterate all, but it is 100% sure to work
+                            it.getAll() // I know kinda shit to iterate all, but it is 100% sure to work
                                 ?.indexOfFirst { value -> value is ResultEpisode && value.id == click.data.id }
                                 ?.let { index ->
                                     if (index >= 0)
@@ -1371,6 +1376,10 @@ class ResultViewModel2 : ViewModel() {
                         } ?: return, list
                     )
                 )
+            }
+            ACTION_MARK_AS_WATCHED -> {
+                // TODO FIX
+//                DataStoreHelper.setViewPos(click.data.id, 1, 1)
             }
         }
     }
@@ -1578,7 +1587,6 @@ class ResultViewModel2 : ViewModel() {
             return
         }
 
-        val episodes = currentEpisodes[indexer]
         val ranges = currentRanges[indexer]
 
         if (ranges?.contains(range) != true) {
@@ -1590,7 +1598,6 @@ class ResultViewModel2 : ViewModel() {
             }
         }
 
-        val size = episodes?.size
         val isMovie = currentResponse?.isMovie() == true
         currentIndex = indexer
         currentRange = range
@@ -1600,6 +1607,7 @@ class ResultViewModel2 : ViewModel() {
             text to r
         } ?: emptyList())
 
+        val size = currentEpisodes[indexer]?.size
         _episodesCountText.postValue(
             some(
                 if (isMovie) null else
@@ -1677,11 +1685,14 @@ class ResultViewModel2 : ViewModel() {
         preferDubStatus = indexer.dubStatus
 
         generator = if (isMovie) {
-            getMovie()?.let { RepoLinkGenerator(listOf(it)) }
+            getMovie()?.let { RepoLinkGenerator(listOf(it), page = currentResponse) }
         } else {
-            episodes?.let { list ->
-                RepoLinkGenerator(list)
-            }
+            val episodes = currentEpisodes.filter { it.key.dubStatus == indexer.dubStatus }
+                .toList()
+                .sortedBy { it.first.season }
+                .flatMap { it.second }
+
+            RepoLinkGenerator(episodes, page = currentResponse)
         }
 
         if (isMovie) {
@@ -1971,42 +1982,42 @@ class ResultViewModel2 : ViewModel() {
         limit: Int = 0
     ): List<ExtractedTrailerData> =
         coroutineScope {
-            var currentCount = 0
-            return@coroutineScope loadResponse.trailers.apmap { trailerData ->
-                try {
-                    val links = arrayListOf<ExtractorLink>()
-                    val subs = arrayListOf<SubtitleFile>()
-                    if (!loadExtractor(
-                            trailerData.extractorUrl,
-                            trailerData.referer,
-                            { subs.add(it) },
-                            { links.add(it) }) && trailerData.raw
-                    ) {
-                        arrayListOf(
-                            ExtractorLink(
-                                "",
-                                "Trailer",
+            val returnlist = ArrayList<ExtractedTrailerData>()
+            loadResponse.trailers.windowed(limit, limit, true).takeWhile { list ->
+                list.amap { trailerData ->
+                    try {
+                        val links = arrayListOf<ExtractorLink>()
+                        val subs = arrayListOf<SubtitleFile>()
+                        if (!loadExtractor(
                                 trailerData.extractorUrl,
-                                trailerData.referer ?: "",
-                                Qualities.Unknown.value,
-                                trailerData.extractorUrl.contains(".m3u8")
-                            )
-                        ) to arrayListOf()
-                    } else {
-                        links to subs
-                    }.also { (extractor, _) ->
-                        if (extractor.isNotEmpty() && limit != 0) {
-                            currentCount++
-                            if (currentCount >= limit) {
-                                cancel()
-                            }
+                                trailerData.referer,
+                                { subs.add(it) },
+                                { links.add(it) }) && trailerData.raw
+                        ) {
+                            arrayListOf(
+                                ExtractorLink(
+                                    "",
+                                    "Trailer",
+                                    trailerData.extractorUrl,
+                                    trailerData.referer ?: "",
+                                    Qualities.Unknown.value,
+                                    trailerData.extractorUrl.contains(".m3u8")
+                                )
+                            ) to arrayListOf()
+                        } else {
+                            links to subs
                         }
+                    } catch (e: Throwable) {
+                        logError(e)
+                        null
                     }
-                } catch (e: Throwable) {
-                    logError(e)
-                    null
+                }.filterNotNull().map { (links, subs) -> ExtractedTrailerData(links, subs) }.let {
+                    returnlist.addAll(it)
                 }
-            }.filterNotNull().map { (links, subs) -> ExtractedTrailerData(links, subs) }
+
+                returnlist.size < limit
+            }
+            return@coroutineScope returnlist
         }
 
 
