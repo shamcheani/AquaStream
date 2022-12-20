@@ -43,12 +43,12 @@ android {
     buildToolsVersion = "30.0.3"
 
     defaultConfig {
-        applicationId = "com.lagradost.cloudstream3"
+        applicationId = "com.killerdogeempire.aquastream"
         minSdk = 21
         targetSdk = 33
 
         versionCode = 55
-        versionName = "3.3.0"
+        versionName = "1.0.3"
 
         resValue("string", "app_version", "${defaultConfig.versionName}${versionNameSuffix ?: ""}")
 
