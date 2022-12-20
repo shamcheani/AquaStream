@@ -65,10 +65,10 @@
     <Preference
         android:title="@string/discord_fork"
         android:icon="@drawable/ic_baseline_discord_24"
-        app:summary="https://discord.gg/BsqShAMKGW">
+        app:summary="https://discord.gg/W8yeGuTwWQ">
     <intent
         android:action="android.intent.action.VIEW"
-        android:data="https://discord.gg/BsqShAMKGW" />
+        android:data="https://discord.gg/W8yeGuTwWQ" />
     </Preference>
     <Preference
         android:title="@string/discord"
