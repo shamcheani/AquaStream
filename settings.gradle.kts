@@ -1,3 +1,3 @@
-rootProject.name = "CloudStream"
+rootProject.name = "AquaStream"
 
 include(":app")

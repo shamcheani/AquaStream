@@ -42,7 +42,7 @@
     <string name="provider_lang_key" translatable="false">provider_lang_key</string>
     <string name="dns_key" translatable="false">dns_key</string>
     <string name="download_path_key" translatable="false">download_path_key</string>
-    <string name="app_name_download_path" translatable="false">Cloudstream</string>
+    <string name="app_name_download_path" translatable="false">AquaStream</string>
     <string name="app_layout_key" translatable="false">app_layout_key</string>
     <string name="primary_color_key" translatable="false">primary_color_key</string>
     <string name="restore_key" translatable="false">restore_key</string>
@@ -95,8 +95,8 @@
     <string name="new_update_format" formatted="true">New update found!\n%s -&gt; %s</string>
     <string name="filler" formatted="true">Filler</string>
     <string name="duration_format" formatted="true">%d min</string>
-    <string name="app_name">CloudStream</string>
-    <string name="play_with_app_name">Play with CloudStream</string>
+    <string name="app_name">AquaStream</string>
+    <string name="play_with_app_name">Play with AquaStream</string>
     <string name="title_home">Home</string>
     <string name="title_search">Search</string>
     <string name="title_downloads">Downloads</string>
@@ -387,14 +387,14 @@
 
         The app is purely for educational and personal use.
 
-        CloudStream 3 does not host any content on the app, and has no control over what media is put up or taken down.
-        CloudStream 3 functions like any other search engine, such as Google. CloudStream 3 does not host, upload or
+        AquaStream does not host any content on the app, and has no control over what media is put up or taken down.
+        AquaStream functions like any other search engine, such as Google. AquaStream does not host, upload or
         manage any videos, films or content. It simply crawls, aggregates and displayes links in a convenient,
         user-friendly interface.
 
         It merely scrapes 3rd-party websites that are publicly accessable via any regular web browser. It is the
         responsibility of user to avoid any actions that might violate the laws governing his/her locality. Use
-        CloudStream 3 at your own risk.
+        AquaStream at your own risk.
     </string>
     <string name="pref_category_links">Links</string>
     <string name="pref_category_app_updates">App updates</string>
@@ -560,7 +560,7 @@
     <string name="plugins_disabled" formatted="true">Disabled: %d</string>
     <string name="plugins_not_downloaded" formatted="true">Not downloaded: %d</string>
     <string name="plugins_updated" formatted="true">Updated %d plugins</string>
-    <string name="blank_repo_message">CloudStream has no sites installed by default. You need to install the sites from repositories.
+    <string name="blank_repo_message">AquaStream has no sites installed by default. You need to install the sites from repositories.
 \n
 \nBecause of a brainless DMCA takedown by Sky UK Limited 🤮 we cannot link the repository site in app.
 \n
