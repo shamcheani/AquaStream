@@ -260,9 +260,11 @@ val extractorApis: MutableList<ExtractorApi> = arrayListOf(
     UpstreamExtractor(),
 
     Tomatomatela(),
+    TomatomatelalClub(),
     Cinestart(),
     OkRu(),
     OkRuHttps(),
+    Okrulink(),
 
     // dood extractors
     DoodCxExtractor(),
@@ -356,6 +358,10 @@ val extractorApis: MutableList<ExtractorApi> = arrayListOf(
     VidSrcExtractor2(),
     PlayLtXyz(),
     AStreamHub(),
+
+    Cda(),
+    Dailymotion(),
+    ByteShare(),
 )
 
 

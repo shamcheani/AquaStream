@@ -15,12 +15,18 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.CommonActivity.showToast
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.BufferedSink
 import okio.buffer
 import okio.sink
 import java.io.File
+import android.text.TextUtils
+import com.lagradost.cloudstream3.utils.AppUtils.setDefaultFocus
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 
 
 class InAppUpdater {
@@ -291,24 +297,52 @@ class InAppUpdater {
                             val context = this
                             builder.apply {
                                 setPositiveButton(R.string.update) { _, _ ->
+                                    // Forcefully start any delayed installations
+                                    if (ApkInstaller.delayedInstaller?.startInstallation() == true) return@setPositiveButton
+
                                     showToast(context, R.string.download_started, Toast.LENGTH_LONG)
-                                    val intent = PackageInstallerService.getIntent(
-                                        context,
-                                        update.updateURL
-                                    )
-                                    ContextCompat.startForegroundService(context, intent)
-//                                    ioSafe {
-//                                        if (
-//                                        !downloadUpdate(update.updateURL)
-//                                        )
-//                                            runOnUiThread {
-//                                                showToast(
-//                                                    context,
-//                                                    R.string.download_failed,
-//                                                    Toast.LENGTH_LONG
-//                                                )
-//                                            }
-//                                    }
+
+                                    // Check if the setting hasn't been changed
+                                    if (settingsManager.getInt(
+                                            getString(R.string.apk_installer_key),
+                                            -1
+                                        ) == -1
+                                    ) {
+                                        if (isMiUi()) // Set to legacy if using miui
+                                            settingsManager.edit()
+                                                .putInt(getString(R.string.apk_installer_key), 1)
+                                                .apply()
+                                    }
+
+                                    val currentInstaller =
+                                        settingsManager.getInt(
+                                            getString(R.string.apk_installer_key),
+                                            0
+                                        )
+
+                                    when (currentInstaller) {
+                                        // New method
+                                        0 -> {
+                                            val intent = PackageInstallerService.getIntent(
+                                                context,
+                                                update.updateURL
+                                            )
+                                            ContextCompat.startForegroundService(context, intent)
+                                        }
+                                        // Legacy
+                                        1 -> {
+                                            ioSafe {
+                                                if (!downloadUpdate(update.updateURL))
+                                                    runOnUiThread {
+                                                        showToast(
+                                                            context,
+                                                            R.string.download_failed,
+                                                            Toast.LENGTH_LONG
+                                                        )
+                                                    }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 setNegativeButton(R.string.cancel) { _, _ -> }
@@ -322,7 +356,7 @@ class InAppUpdater {
                                     }
                                 }
                             }
-                            builder.show()
+                            builder.show().setDefaultFocus()
                         } catch (e: Exception) {
                             logError(e)
                         }
@@ -332,6 +366,21 @@ class InAppUpdater {
                 return false
             }
             return false
+        }
+
+        private fun isMiUi(): Boolean {
+            return !TextUtils.isEmpty(getSystemProperty("ro.miui.ui.version.name"))
+        }
+
+        private fun getSystemProperty(propName: String): String? {
+            return try {
+                val p = Runtime.getRuntime().exec("getprop $propName")
+                BufferedReader(InputStreamReader(p.inputStream), 1024).use {
+                    it.readLine()
+                }
+            } catch (ex: IOException) {
+                null
+            }
         }
     }
 }
