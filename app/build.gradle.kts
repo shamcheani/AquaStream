@@ -19,7 +19,7 @@ fun String.execute() = ByteArrayOutputStream().use { baot ->
             workingDir = projectDir
             commandLine = this@execute.split(Regex("\\s"))
             standardOutput = baot
-    }.exitValue == 0)
+        }.exitValue == 0)
         String(baot.toByteArray()).trim()
     else null
 }
@@ -47,8 +47,8 @@ android {
         minSdk = 21
         targetSdk = 33
 
-        versionCode = 55
-        versionName = "1.0.3"
+        versionCode = 57
+        versionName = "1.0.4"
 
         resValue("string", "app_version", "${defaultConfig.versionName}${versionNameSuffix ?: ""}")
 
@@ -220,6 +220,9 @@ dependencies {
 
     // Library/extensions searching with Levenshtein distance
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
+
+    // color pallette for images -> colors
+    implementation("androidx.palette:palette-ktx:1.0.0")
 }
 
 tasks.register("androidSourcesJar", Jar::class) {
