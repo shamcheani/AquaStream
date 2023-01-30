@@ -320,7 +320,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryCoolBlue</item>
         <item name="colorPrimaryDark">#306981</item>
         <item name="colorAccent">#51b0d7</item>
-        <item name="colorOnPrimary">#408cac</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--    Needed for leanback fuckery    -->
         <item name="android:colorAccent">@color/colorPrimaryCoolBlue</item>
     </style>
@@ -340,7 +340,7 @@
         <item name="android:colorPrimary">@color/colorPrimaryOrange</item>
         <item name="colorPrimaryDark">#A66B00</item>
         <item name="colorAccent">#CE8500</item>
-        <item name="colorOnPrimary">#CE8500</item>
+        <item name="colorOnPrimary">@color/whiteText</item>
         <!--    Needed for leanback fuckery    -->
         <item name="android:colorAccent">@color/colorPrimaryOrange</item>
     </style>
