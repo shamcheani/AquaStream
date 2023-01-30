@@ -28,12 +28,12 @@
 
     <color name="progressBackgroundColor">#1AFFFFFF</color>
 
-    <color name="dubColorText">#0e1440</color> <!--3b65f5 f18c82 8294F1-->
+    <color name="dubColorText">#181c3d</color> <!--3b65f5 f18c82 8294F1-->
     <color name="amoledModeLight">#121213</color>
 
-    <color name="dubColorBg">#121950</color>
-    <color name="subColorText">#46120e</color> <!--F53B66 FA3D79-->
-    <color name="subColorBg">#571711</color>
+    <color name="dubColorBg">#1d327a</color>
+    <color name="subColorText">#331218</color> <!--F53B66 FA3D79-->
+    <color name="subColorBg">#621728</color>
     <color name="typeColorText">#BEC8FF</color>
     <color name="typeColorBg">?attr/colorPrimaryDark</color>
     <color name="ratingColor">#4C3115</color>
