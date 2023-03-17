@@ -1,5 +1,4 @@
 # AquaStream
-test
 
 **⚠️ Warning: By default this app doesn't provide any video sources, you have to install extensions in order to add functionality to the app.**
 
